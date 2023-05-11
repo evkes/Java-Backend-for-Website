@@ -1,9 +1,8 @@
 package cpsc4620;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -67,10 +66,62 @@ public class Menu {
 	private static void AddDrivers(Scanner scanner) {
 	}
 
-	private static void AddSchedules(Scanner scanner) {
+	private static Person SelectPerson(Scanner scanner) throws SQLException, IOException {
+		ArrayList<Person> people = DBNinja.getPeople();
+		for (int i = 0; i < people.size(); i++) {
+			System.out.println((i+1) + ". " + people.get(i));
+		}
+	
+		System.out.print("Enter the number of the person you are: ");
+		String ind = scanner.nextLine();
+		int personIndex = Integer.parseInt(ind);
+	
+		if (personIndex < 1 || personIndex > people.size()) {
+			System.out.println("Invalid person number. Please try again.");
+			SelectPerson(scanner);
+		}
+	
+		Person selectedPerson = people.get(personIndex - 1);
+		System.out.println("Selected person: " + selectedPerson);
+		return selectedPerson;
 	}
+	
+
+	private static void AddSchedules(Scanner scanner) {
+		Person person = null;
+		try {
+			person = SelectPerson(scanner);
+		} catch (SQLException | IOException e) {
+			e.printStackTrace();
+		}
+
+		String[] daysOfWeek = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+		for (String day : daysOfWeek) {
+			System.out.println("Enter details for " + day + ":");
+			System.out.print("Enter start place: ");
+			String startPlace = scanner.nextLine();
+			System.out.print("Enter end place: ");
+			String endPlace = scanner.nextLine();
+			System.out.print("Enter start time (HH:MM:SS): ");
+			String startTimeStr = scanner.nextLine();
+			Time startTime = Time.valueOf(startTimeStr);
+			System.out.print("Enter end time (HH:MM:SS): ");
+			String endTimeStr = scanner.nextLine();
+			Time endTime = Time.valueOf(endTimeStr);
+	
+			Schedule schedule = new Schedule(0, startPlace, endPlace, startTime, endTime, day, person.getPersonId());
+			try {
+				DBNinja.insertSchedule(schedule);
+				System.out.println("New schedule added to for person: " + person.getPersonId());
+			} catch (SQLException | IOException e) {
+				System.out.println("Error adding schedule to database: " + e.getMessage());
+			}
+		}
+	}
+	
 
 	private static void AddVehicles(Scanner scanner) {
+		System.out.println("Please enter a vehicle license: ");
 	}
 
 	private static void AddPeople(Scanner scanner) {
